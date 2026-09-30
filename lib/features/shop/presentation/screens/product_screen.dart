@@ -9,8 +9,6 @@ import 'cart_screen.dart';
 class ProductCatalogScreen extends StatelessWidget {
   const ProductCatalogScreen({super.key});
 
-  /// Opens the swipeable bottom sheet drawer containing selected cart items.
-  /// Wrapped in BlocProvider.value to ensure ProductBloc is accessible within the modal route.
   void _showCartDrawer(BuildContext parentContext, List<Product> cartItems) {
     showModalBottomSheet(
       context: parentContext,
@@ -24,7 +22,6 @@ class ProductCatalogScreen extends StatelessWidget {
             minChildSize: 0.4,
             maxChildSize: 0.95,
             builder: (context, scrollController) {
-              // Group identical products to calculate counts properly
               final Map<Product, int> productCounts = {};
               for (var item in cartItems) {
                 productCounts.update(item, (count) => count + 1, ifAbsent: () => 1);
@@ -39,7 +36,6 @@ class ProductCatalogScreen extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    // Top handle bar for dragging / expanding
                     const SizedBox(height: 12),
                     Container(
                       width: 40,
@@ -51,7 +47,6 @@ class ProductCatalogScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
 
-                    // Header with Title, Item Count, and Close (Cross) Icon
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Row(
@@ -95,7 +90,6 @@ class ProductCatalogScreen extends StatelessWidget {
                     ),
                     const Divider(height: 1, thickness: 1),
 
-                    // List of selected products with quantities and remove actions
                     Expanded(
                       child: uniqueProducts.isEmpty
                           ? const Center(
@@ -161,7 +155,7 @@ class ProductCatalogScreen extends StatelessWidget {
                                         ),
                                       ),
                                       const SizedBox(width: 8),
-                                      // Quantity controls (- and +)
+
                                       Row(
                                         children: [
                                           InkWell(
@@ -211,7 +205,6 @@ class ProductCatalogScreen extends StatelessWidget {
                             ),
                     ),
 
-                    // Bottom Summary & Checkout action inside drawer
                     if (uniqueProducts.isNotEmpty)
                       Container(
                         padding: const EdgeInsets.all(20),
@@ -300,7 +293,6 @@ class ProductCatalogScreen extends StatelessWidget {
           ),
         ),
         actions: [
-          // Cart Icon badge in AppBar
           BlocBuilder<ProductBloc, ProductState>(
             builder: (context, state) {
               final cartCount = state is ProductLoadedState ? state.cartItems.length : 0;
@@ -397,8 +389,7 @@ class ProductCatalogScreen extends StatelessWidget {
                             onTap: () {
                               final bloc = BlocProvider.of<ProductBloc>(context);
                               bloc.add(AddToCartEvent(product));
-                              
-                              // Directly display the drawer to the user when adding a product
+
                               final currentState = bloc.state;
                               if (currentState is ProductLoadedState) {
                                 _showCartDrawer(context, currentState.cartItems);
