@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget{
       theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
       home: BlocProvider(
         create: (context) => ProductBloc(repository: repository)..add(FetchProductsEvents()),
-        child: const ProductCatalogScreen(),
+        child: ProductCatalogScreen(),
       ),
     );
   }

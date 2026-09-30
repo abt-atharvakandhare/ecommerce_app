@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../domain/entities/product.dart';
 import '../bloc/product_bloc.dart';
 import '../bloc/product_event.dart';
 import '../bloc/product_state.dart';
@@ -7,6 +8,281 @@ import 'cart_screen.dart';
 
 class ProductCatalogScreen extends StatelessWidget {
   const ProductCatalogScreen({super.key});
+
+  /// Opens the swipeable bottom sheet drawer containing selected cart items.
+  /// Wrapped in BlocProvider.value to ensure ProductBloc is accessible within the modal route.
+  void _showCartDrawer(BuildContext parentContext, List<Product> cartItems) {
+    showModalBottomSheet(
+      context: parentContext,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (modalContext) {
+        return BlocProvider.value(
+          value: BlocProvider.of<ProductBloc>(parentContext),
+          child: DraggableScrollableSheet(
+            initialChildSize: 0.6,
+            minChildSize: 0.4,
+            maxChildSize: 0.95,
+            builder: (context, scrollController) {
+              // Group identical products to calculate counts properly
+              final Map<Product, int> productCounts = {};
+              for (var item in cartItems) {
+                productCounts.update(item, (count) => count + 1, ifAbsent: () => 1);
+              }
+              final uniqueProducts = productCounts.keys.toList();
+              final totalPrice = cartItems.fold(0.0, (sum, item) => sum + item.price);
+
+              return Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                child: Column(
+                  children: [
+                    // Top handle bar for dragging / expanding
+                    const SizedBox(height: 12),
+                    Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Header with Title, Item Count, and Close (Cross) Icon
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              const Text(
+                                'Selected Cart Items',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.deepPurple.shade50,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  '${cartItems.length}',
+                                  style: const TextStyle(
+                                    color: Colors.deepPurple,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close, color: Colors.black54),
+                            onPressed: () => Navigator.pop(modalContext),
+                            tooltip: 'Close drawer',
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Divider(height: 1, thickness: 1),
+
+                    // List of selected products with quantities and remove actions
+                    Expanded(
+                      child: uniqueProducts.isEmpty
+                          ? const Center(
+                              child: Text(
+                                'No products selected yet',
+                                style: TextStyle(color: Colors.grey, fontSize: 15),
+                              ),
+                            )
+                          : ListView.separated(
+                              controller: scrollController,
+                              padding: const EdgeInsets.all(16),
+                              itemCount: uniqueProducts.length,
+                              separatorBuilder: (context, index) => const SizedBox(height: 12),
+                              itemBuilder: (context, index) {
+                                final product = uniqueProducts[index];
+                                final count = productCounts[product] ?? 1;
+                                final itemTotal = product.price * count;
+
+                                return Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade50,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: Colors.grey.shade200),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.network(
+                                          product.image,
+                                          width: 50,
+                                          height: 50,
+                                          fit: BoxFit.contain,
+                                          errorBuilder: (context, error, stackTrace) =>
+                                              const Icon(Icons.broken_image,
+                                                  size: 50, color: Colors.grey),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              product.title,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              'RS. ${product.price.toStringAsFixed(0)} x $count = RS. ${itemTotal.toStringAsFixed(0)}',
+                                              style: TextStyle(
+                                                color: Colors.grey.shade700,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      // Quantity controls (- and +)
+                                      Row(
+                                        children: [
+                                          InkWell(
+                                            onTap: () {
+                                              BlocProvider.of<ProductBloc>(context)
+                                                  .add(RemoveFromCartEvent(product));
+                                            },
+                                            child: Container(
+                                              padding: const EdgeInsets.all(4),
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey.shade200,
+                                                borderRadius: BorderRadius.circular(6),
+                                              ),
+                                              child: const Icon(Icons.remove, size: 16),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                                            child: Text(
+                                              '$count',
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ),
+                                          InkWell(
+                                            onTap: () {
+                                              BlocProvider.of<ProductBloc>(context)
+                                                  .add(AddToCartEvent(product));
+                                            },
+                                            child: Container(
+                                              padding: const EdgeInsets.all(4),
+                                              decoration: BoxDecoration(
+                                                color: Colors.deepPurple.shade100,
+                                                borderRadius: BorderRadius.circular(6),
+                                              ),
+                                              child: const Icon(Icons.add, size: 16, color: Colors.deepPurple),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                    ),
+
+                    // Bottom Summary & Checkout action inside drawer
+                    if (uniqueProducts.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, -5),
+                            ),
+                          ],
+                        ),
+                        child: SafeArea(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text(
+                                    'Total Amount:',
+                                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                                  ),
+                                  Text(
+                                    'RS. ${totalPrice.toStringAsFixed(0)}',
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.deepPurple,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                onPressed: () {
+                                  Navigator.pop(modalContext);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => BlocProvider.value(
+                                        value: BlocProvider.of<ProductBloc>(context),
+                                        child: const CartScreen(),
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: const Text('View Full Cart', style: TextStyle(fontWeight: FontWeight.bold)),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,20 +300,51 @@ class ProductCatalogScreen extends StatelessWidget {
           ),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.shopping_cart_outlined, color: Colors.black),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => BlocProvider.value(
-                    value: BlocProvider.of<ProductBloc>(context),
-                    child: const CartScreen(),
+          // Cart Icon badge in AppBar
+          BlocBuilder<ProductBloc, ProductState>(
+            builder: (context, state) {
+              final cartCount = state is ProductLoadedState ? state.cartItems.length : 0;
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.shopping_cart_outlined, color: Colors.black),
+                    onPressed: () {
+                      if (state is ProductLoadedState) {
+                        _showCartDrawer(context, state.cartItems);
+                      }
+                    },
                   ),
-                ),
+                  if (cartCount > 0)
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
+                        child: Text(
+                          '$cartCount',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
               );
             },
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: BlocBuilder<ProductBloc, ProductState>(
@@ -52,7 +359,7 @@ class ProductCatalogScreen extends StatelessWidget {
               padding: const EdgeInsets.all(14),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                childAspectRatio: 0.75,
+                childAspectRatio: 0.72,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 16,
               ),
@@ -62,7 +369,6 @@ class ProductCatalogScreen extends StatelessWidget {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Wrap the image container and ADD button in a Stack
                     Stack(
                       children: [
                         Container(
@@ -89,18 +395,14 @@ class ProductCatalogScreen extends StatelessWidget {
                           right: 6,
                           child: InkWell(
                             onTap: () {
-                              BlocProvider.of<ProductBloc>(context)
-                                  .add(AddToCartEvent(product));
-                              ScaffoldMessenger.of(context).clearSnackBars();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                      '${product.title} added to cart!'),
-                                  behavior: SnackBarBehavior.floating,
-                                  duration: const Duration(
-                                      milliseconds: 800),
-                                ),
-                              );
+                              final bloc = BlocProvider.of<ProductBloc>(context);
+                              bloc.add(AddToCartEvent(product));
+                              
+                              // Directly display the drawer to the user when adding a product
+                              final currentState = bloc.state;
+                              if (currentState is ProductLoadedState) {
+                                _showCartDrawer(context, currentState.cartItems);
+                              }
                             },
                             child: Container(
                               padding: const EdgeInsets.symmetric(
