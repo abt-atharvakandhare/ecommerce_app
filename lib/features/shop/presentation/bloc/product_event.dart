@@ -1,3 +1,5 @@
+import 'package:ecommerce_app/features/shop/domain/entities/product.dart';
+
 abstract class ProductEvent{}
 
 class FetchProductsEvents extends ProductEvent{}

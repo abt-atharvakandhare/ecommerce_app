@@ -11,17 +11,18 @@ class CartScreen extends StatelessWidget{
   Widget build(BuildContext context){
     return Scaffold(
       appBar: AppBar(title: const Text('Cart')),
-      body: BlocBuilder<ProductBloc, ProductState<(
+      body: BlocBuilder <ProductBloc, ProductState>(
         builder: (context, state){
           if (state is ProductLoadedState){
-            final cart = state.CartItems;
+            final cart = state.cartItems;
             if(cart.isEmpty){
               return const Center(child: Text('Nothing to show in Cart!!'));
             }
-            return ListView.buider(
+            return ListView.builder(
               itemCount: cart.length,
-              itemBuilder: (Context, index){
-                return ListTitle(
+              itemBuilder: (context, index){
+                final item = cart[index];
+                return ListTile(
                   leading: Image.network(item.image, width: 40, height: 40),
                   title: Text(item.title),
                   subtitle:Text('\$${item.price}'),
@@ -36,7 +37,7 @@ class CartScreen extends StatelessWidget{
               },
             );
           }
-          return const Center(child: CircularProgreeIndicator());
+          return const Center(child: CircularProgressIndicator());
         },
       ),
     );

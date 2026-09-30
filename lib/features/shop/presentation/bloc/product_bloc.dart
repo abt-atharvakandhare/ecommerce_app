@@ -9,13 +9,13 @@ class ProductBloc extends Bloc<ProductEvent, ProductState>{
   final List<Product> _cart =[];
 
   ProductBloc({required this.repository}) : super(ProductInitialState()){
-    on<FetchProductsEvent>(_onFetchProducts);
+    on<FetchProductsEvents>(_onFetchProducts);
     on<AddToCartEvent>(_onAddToCart);
     on<RemoveFromCartEvent>(_onRemoveFromCart);
   }
 
   Future<void> _onFetchProducts(
-      FetchProductEvent event, Emitter<ProductState> emit) async{
+      FetchProductsEvents event, Emitter<ProductState> emit) async{
     emit(ProductLoadingState());
     try{
       final products = await repository.getProducts();
@@ -28,7 +28,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState>{
   void _onAddToCart(AddToCartEvent event, Emitter<ProductState> emit){
     _cart.add(event.product);
     if(state is ProductLoadedState){
-      final currentState = State as ProductLoadedState;
+      final currentState = state as ProductLoadedState;
       emit(ProductLoadedState(
         products: currentState.products, cartItems: List.from(_cart)));
     }
@@ -37,7 +37,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState>{
   void _onRemoveFromCart(RemoveFromCartEvent event, Emitter<ProductState> emit){
     _cart.remove(event.product);
     if(state is ProductLoadedState){
-      final currentState = State as ProductLoadedState;
+      final currentState = state as ProductLoadedState;
       emit(ProductLoadedState(
           products: currentState.products, cartItems: List.from(_cart)));
     }
