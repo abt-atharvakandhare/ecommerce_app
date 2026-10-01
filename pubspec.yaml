@@ -38,6 +38,8 @@ dependencies:
   dio: ^5.11.1
   equatable: ^3.0.0
   foundation: ^0.0.5
+  google_fonts: ^9.0.0
+  gestures: ^1.0.0
 
 dev_dependencies:
   flutter_test:
