@@ -35,7 +35,10 @@ class ProductBloc extends Bloc<ProductEvent, ProductState>{
   }
 
   void _onRemoveFromCart(RemoveFromCartEvent event, Emitter<ProductState> emit){
-    _cart.remove(event.product);
+    final index = _cart.indexWhere((item) => item.id == event.product.id);
+    if(index != -1) {
+      _cart.removeAt(index);
+    }
     if(state is ProductLoadedState){
       final currentState = state as ProductLoadedState;
       emit(ProductLoadedState(

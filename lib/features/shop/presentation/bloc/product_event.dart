@@ -9,6 +9,16 @@ class AddToCartEvent extends ProductEvent{
   AddToCartEvent(this.product);
 }
 
+class IncrementCartItemEvent extends ProductEvent{
+  final Product product;
+  IncrementCartItemEvent(this.product);
+}
+
+class DecrementCartItemEvent extends ProductEvent{
+  final Product product;
+  DecrementCartItemEvent(this.product);
+}
+
 class RemoveFromCartEvent extends ProductEvent{
   final Product product;
   RemoveFromCartEvent(this.product);
