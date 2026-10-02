@@ -296,6 +296,7 @@ class ProductCatalogScreen extends StatelessWidget {
             color: Colors.black,
             fontWeight: FontWeight.bold,
             fontSize: 20,
+            fontStyle: FontStyle.italic,
           ),
         ),
         actions: [
@@ -372,11 +373,11 @@ class ProductCatalogScreen extends StatelessWidget {
                           width: double.infinity,
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF5F5F5),
+                            color: Colors.white70,
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: Colors.grey.shade300,
-                              width: 0.5,
+                              color: Colors.grey,
+                              width: 0.8,
                             ),
                           ),
                           child: Image.network(
@@ -397,15 +398,18 @@ class ProductCatalogScreen extends StatelessWidget {
                             },
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
+                                horizontal: 8,
+                                vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(6),
-                                border: Border.all(
-                                  color: Colors.red.shade100,
-                                  width: 1,
+                                color: Colors.white70,
+                                borderRadius: BorderRadius.only(topLeft: Radius.circular(8), bottomRight: Radius.circular(8)),
+                                border: Border.symmetric(
+                                  vertical: BorderSide(
+                                    color: Colors.redAccent,
+                                    width: 2,
+                                  ),horizontal: BorderSide(color: Colors.redAccent, width: 0.5),
+
                                 ),
                                 boxShadow: [
                                   BoxShadow(
@@ -439,14 +443,21 @@ class ProductCatalogScreen extends StatelessWidget {
                           ),
                           decoration: BoxDecoration(
                             color: Colors.lightGreen.shade100,
-                            borderRadius: BorderRadius.circular(4),
+                            borderRadius: BorderRadius.circular(5),
+                            border: Border.symmetric(
+                              vertical: BorderSide(
+                                color: Colors.green.shade600,
+                                width: 0.5,
+                              ),
+
+                            )
                           ),
                           child: Text(
                             'RS. ${product.price.toStringAsFixed(0)}',
                             style: const TextStyle(
                               color: Colors.green,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 11,
                             ),
                           ),
                         ),
@@ -455,9 +466,9 @@ class ProductCatalogScreen extends StatelessWidget {
                           Text(
                             'RS. ${product.originalPrice!.toStringAsFixed(0)}',
                             style: const TextStyle(
-                              color: Colors.grey,
+                              color: Colors.blueGrey,
                               decoration: TextDecoration.lineThrough,
-                              fontSize: 11,
+                              fontSize: 10,
                             ),
                           ),
                         ],
