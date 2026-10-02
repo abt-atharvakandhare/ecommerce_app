@@ -5,22 +5,24 @@ import 'features/shop/data/resources/product_datasource.dart';
 import 'features/shop/domain/repositories/product_repository.dart';
 import 'features/shop/presentation/bloc/product_bloc.dart';
 import 'features/shop/presentation/bloc/product_event.dart';
-import 'features/shop/presentation/screens/splash_screen.dart';
+import 'features/shop/presentation/screens/login_screen.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final dioClient = DioClient();
+  await dioClient.init();
   final datasource = ProductDataResource(dio: dioClient.dio);
   final repository = ProductRepository(datasource: datasource);
 
-  runApp(MyApp(repository: repository));
+  runApp(MyApp(repository: repository, dioClient: dioClient));
 }
 
 class MyApp extends StatelessWidget {
   final ProductRepository repository;
+  final DioClient dioClient;
 
-  const MyApp({super.key, required this.repository});
+  const MyApp({super.key, required this.repository, required this.dioClient});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +32,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'E-Commerce Application',
         theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
-        home: const SplashScreen(),
+        home: LoginTestScreen(dioClient: dioClient),
       ),
     );
   }

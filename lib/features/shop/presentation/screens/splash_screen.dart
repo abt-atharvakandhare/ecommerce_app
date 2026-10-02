@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../../../core/network/dio_client.dart';
 import 'product_screen.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  final DioClient dioClient;
+  const SplashScreen({super.key, required this.dioClient});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -43,7 +45,7 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
             SizedBox(height: 20),
             Text(
-              'E-Commerce App',
+              'Habibi Next',
               style: TextStyle(
                 fontSize: 22,
                 fontFamily: 'CustomFont',

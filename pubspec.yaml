@@ -40,6 +40,10 @@ dependencies:
   foundation: ^0.0.5
   google_fonts: ^9.0.0
   gestures: ^1.0.0
+  flutter_secure_storage: ^11.2.0
+  dio_cookie_manager: ^3.5.0
+  cookie_jar: ^4.0.9
+  path_provider: ^2.1.6
 
 dev_dependencies:
   flutter_test:
